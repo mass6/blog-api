@@ -49,6 +49,10 @@ class Handler extends ExceptionHandler
             return response()->json($exception->getMessage(), 404);
         }
 
+        if ($exception instanceof QuotaExceededException) {
+            return response()->json($exception->getMessage(), 403);
+        }
+
         return parent::render($request, $exception);
     }
 

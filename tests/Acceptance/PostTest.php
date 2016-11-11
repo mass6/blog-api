@@ -124,9 +124,7 @@ class PostTest extends TestCase
         $this->assertEmpty(Post::all(), 'The post should be deleted.');
     }
 
-    /** @test
-     * @group current
-     */
+    /** @test */
     public function a_user_cannot_delete_another_users_post()
     {
         // Given there is an existing post from a another user
@@ -140,6 +138,22 @@ class PostTest extends TestCase
         $posts = Post::first();
         $this->assertEquals(1, $posts->count());
     }
+
+    /** @test */
+    public function a_user_is_not_allowed_to_exceed_his_daily_post_quota()
+    {
+        // Given a user who has reached his daily post quota
+        $quota = config('api.rate-limit.posts', 5);
+        factory(Post::class, $quota)->create(['author_id' => $this->user->id]);
+        // When the user attempts to create an additional post
+        $this->postJson('/api/posts', ['title' => 'foo', 'body' => 'bar'], $this->headers);
+
+        // Then the user's request should be rejected,
+        // and should return a 403 "QuotaExceededException" response
+        $this->assertEquals(403, $this->response->getStatusCode());
+        $this->assertCount($quota, Post::all());
+    }
+
 
 
     /*
