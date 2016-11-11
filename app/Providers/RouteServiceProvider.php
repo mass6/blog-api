@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Post;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -26,6 +28,17 @@ class RouteServiceProvider extends ServiceProvider
         //
 
         parent::boot();
+
+        /** Explicit Bindings */
+        Route::bind('post', function ($value) {
+            try {
+                return Post::with('author')->findOrFail($value);
+            }
+            catch(ModelNotFoundException $e)
+            {
+                throw new ModelNotFoundException('Post not found with the given id.');
+            }
+        });
     }
 
     /**

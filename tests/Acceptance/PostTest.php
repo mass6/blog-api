@@ -1,27 +1,175 @@
 <?php
 
 use App\Post;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
+use App\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 
 class PostTest extends TestCase
 {
     use DatabaseMigrations;
 
-    /** @test */
+    /** @var  User */
+    private $user;
+
+    private $token;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->user = factory(User::class)->create();
+        $this->token = $this->getAccessToken($this->user);
+        $this->headers = [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.$this->token,
+        ];
+    }
+
+    ///** @test */
     public function a_visitor_can_read_a_post()
     {
         // Given there is a post
         $post = factory(Post::class)->create([]);
 
         // When a visitor tries to access the post resource
-        $response = $this->call('GET', '/api/posts/' . $post->id);
+        $this->get('/api/posts/' . $post->id);
+        //$response = $this->call('GET', '/api/posts/' . $post->id);
 
         // Then he should she the post details
         $this->assertResponseOk();
-        $read = json_decode($response->getContent());
+        $read = json_decode($this->response->getContent());
         $this->assertEquals($post->id, $read->id);
         $this->assertEquals($post->body, $read->body);
+    }
+
+    /** @test */
+    public function a_user_can_create_a_blog_post()
+    {
+        // When I post a new blog post to the api
+        $post = factory(Post::class)->make();
+        $this->postJson('/api/posts', $post->toArray(), $this->headers);
+
+        // Then a new blog post should be created and stored in the database
+        $this->assertResponseOk();
+        $saved = Post::first();
+        $this->assertEquals($post->title, $saved->title);
+        $this->assertEquals($post->body, $saved->body);
+    }
+
+    /** @test */
+    public function a_blog_post_must_pass_validation()
+    {
+        // When I attempt to create new posts with invalid data...
+
+        // Title missing
+        $this->postJson('/api/posts', factory(Post::class)->make(['title' => ''])->toArray(), $this->headers);
+        $this->assertEquals(422, $this->response->getStatusCode());
+
+        // Body missing
+        $this->postJson('/api/posts', factory(Post::class)->make(['body' => ''])->toArray(), $this->headers);
+        $this->assertEquals(422, $this->response->getStatusCode());
+
+        // Title to long
+        $stringOver255Chars = 'mnJhb9Hwz6wGY3NX6vOyJv2GbVtYmh5Wh1L1nWlkJAnl2DUcg1vwFqCoWhoJPn46Km6CgmHUVw9RwtHLQYwSWeGgBqDDRE8Xo36SGEYQZIfapE14BIfReRL7rFz9FPzx5gZzMHNEZBmmzzjtWFhVJSGoYspSKWkGMxLNt3wqH4cslOkHOu6f2oLYnroq9Hc97PL4SBwrRNyVRs2vzZycvbu000r2s0RcFXlaOpcTANYBH3LS94UtJ0PlSIqnwnew';
+        $this->postJson('/api/posts', factory(Post::class)->make(['title' => $stringOver255Chars])->toArray(), $this->headers);
+        $this->assertEquals(422, $this->response->getStatusCode());
+    }
+
+    /** @test */
+    public function a_user_can_update_a_post()
+    {
+        // Given there is an existing post
+        $post = $this->user->posts()->create(factory(Post::class)->make()->toArray());
+
+        // When I update the post's title and body
+        $updates = ['title' => 'foo', 'body' => 'bar'];
+        $this->patchJson('/api/posts/' . $post->id, $updates, $this->headers);
+
+        // Then the changes should reflect in the database
+        $this->assertResponseOk();
+        $retrieved = Post::first();
+        $this->assertEquals($updates['title'], $retrieved->title);
+        $this->assertEquals($updates['body'], $retrieved->body);
+    }
+
+    /** @test */
+    public function a_user_cannot_update_another_users_post()
+    {
+        // Given there is an existing post from a another user
+        $post = factory(User::class)->create()->posts()->create(factory(Post::class)->make()->toArray());
+
+        // When I try to update the post that was created by another user
+        $updates = ['title' => 'foo', 'body' => 'bar'];
+        $this->patchJson('/api/posts/' . $post->id, $updates, $this->headers);
+
+        // Then I should receive an "Unauthorized" response, and the changes should not be saved
+        $this->assertEquals(401, $this->response->getStatusCode());
+        $retrieved = Post::first();
+        $this->assertEquals($post->title, $retrieved->title);
+        $this->assertEquals($post->body, $retrieved->body);
+    }
+
+    /** @test */
+    public function a_user_can_delete_his_own_post()
+    {
+        // Given there is an existing post
+        $post = $this->user->posts()->create(factory(Post::class)->make()->toArray());
+
+        // When I set a delete request
+        $this->deleteJson('/api/posts/' . $post->id, [], $this->headers);
+
+        // Then the post should be deleted
+        $this->assertResponseOk();
+        $this->assertEmpty(Post::all(), 'The post should be deleted.');
+    }
+
+    /** @test
+     * @group current
+     */
+    public function a_user_cannot_delete_another_users_post()
+    {
+        // Given there is an existing post from a another user
+        $post = factory(User::class)->create()->posts()->create(factory(Post::class)->make()->toArray());
+
+        // When I try to delete the post that was created by another user
+        $this->deleteJson('/api/posts/' . $post->id, [], $this->headers);
+
+        // Then I should receive an "Unauthorized" response, and the post should not be deleted
+        $this->assertEquals(401, $this->response->getStatusCode());
+        $posts = Post::first();
+        $this->assertEquals(1, $posts->count());
+    }
+
+
+    /*
+     |--------------------------------------------------------------------------
+     | Utility Methods
+     |--------------------------------------------------------------------------
+     |
+     */
+
+    /**
+     * Creates a Password Grant Client and returns the access token
+     *
+     * @param User $user
+     * @return
+     */
+    protected function getAccessToken(User $user)
+    {
+        $this->artisan('passport:install');
+        $PasswordGrantClient = DB::table('oauth_clients')->where('name', 'Laravel Password Grant Client')->get()->first();
+
+        $this->post('/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => $PasswordGrantClient->id,
+                'client_secret' => $PasswordGrantClient->secret,
+                'username' => $user->email,
+                'password' => 'secret',
+                'scope' => '',
+        ]);
+        $response = json_decode($this->response->getContent(), true);
+
+        return $response['access_token'];
     }
 }

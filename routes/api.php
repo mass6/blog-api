@@ -1,8 +1,5 @@
 <?php
 
-use App\Post;
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,10 +11,13 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/posts/{post}', function (Post $post) {
-    return response()->json($post);
-});
+// Public Routes
+Route::get('/posts/{post}', 'PostsController@show');
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
+
+// Protected Routes
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::post('posts', 'PostsController@store');
+    Route::patch('posts/{post}', 'PostsController@update');
+    Route::delete('posts/{post}', 'PostsController@destroy');
+});
