@@ -13,6 +13,17 @@ class Post extends Model
 
     protected $fillable = ['title', 'body'];
 
+    /*
+     |--------------------------------------------------------------------------
+     | Operations
+     |--------------------------------------------------------------------------
+     |
+     */
+
+    public function addComment($data)
+    {
+        $this->comments()->create($data);
+    }
 
     /*
      |--------------------------------------------------------------------------
@@ -29,5 +40,15 @@ class Post extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /**
+     * Relation: A post has many comments
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }

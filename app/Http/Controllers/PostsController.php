@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Comment;
 use App\Post;
 use Illuminate\Http\Request;
 
@@ -84,6 +85,24 @@ class PostsController extends Controller
         $post->update([
             'title' => $request->get('title'),
             'body' => $request->get('body')
+        ]);
+    }
+
+    /**
+     * Comment on a post.
+     *
+     * @param Post                      $post
+     * @param  \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function comment(Post $post, Request $request)
+    {
+        $this->validate($request, Comment::$validationRules);
+
+        $post->addComment([
+            'body' => $request->get('body'),
+            'user_id' => $request->user()->id
         ]);
     }
 

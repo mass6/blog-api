@@ -2,35 +2,15 @@
 
 use App\Post;
 use App\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Support\Facades\DB;
 
-class PostTest extends TestCase
+class PostTest extends PassportTestCase
 {
-    use DatabaseMigrations;
 
-    /** @var  User */
-    private $user;
-
-    private $token;
-
-    public function setUp()
-    {
-        parent::setUp();
-        $this->user = factory(User::class)->create();
-        $this->token = $this->getAccessToken($this->user);
-        $this->headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer '.$this->token,
-        ];
-    }
-
-    ///** @test */
+    /** @test */
     public function a_visitor_can_read_a_post()
     {
         // Given there is a post
-        $post = factory(Post::class)->create([]);
+        $post = $this->user->posts()->create(factory(Post::class)->make()->toArray());
 
         // When a visitor tries to access the post resource
         $this->get('/api/posts/' . $post->id);
@@ -152,38 +132,5 @@ class PostTest extends TestCase
         // and should return a 403 "QuotaExceededException" response
         $this->assertEquals(403, $this->response->getStatusCode());
         $this->assertCount($quota, Post::all());
-    }
-
-
-
-    /*
-     |--------------------------------------------------------------------------
-     | Utility Methods
-     |--------------------------------------------------------------------------
-     |
-     */
-
-    /**
-     * Creates a Password Grant Client and returns the access token
-     *
-     * @param User $user
-     * @return
-     */
-    protected function getAccessToken(User $user)
-    {
-        $this->artisan('passport:install');
-        $PasswordGrantClient = DB::table('oauth_clients')->where('name', 'Laravel Password Grant Client')->get()->first();
-
-        $this->post('/oauth/token', [
-                'grant_type' => 'password',
-                'client_id' => $PasswordGrantClient->id,
-                'client_secret' => $PasswordGrantClient->secret,
-                'username' => $user->email,
-                'password' => 'secret',
-                'scope' => '',
-        ]);
-        $response = json_decode($this->response->getContent(), true);
-
-        return $response['access_token'];
     }
 }
