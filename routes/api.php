@@ -1,5 +1,6 @@
 <?php
 
+use App\Post;
 use Illuminate\Http\Request;
 
 /*
@@ -12,6 +13,10 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::get('/posts/{post}', function (Post $post) {
+    return response()->json($post);
+});
 
 Route::get('/user', function (Request $request) {
     return $request->user();

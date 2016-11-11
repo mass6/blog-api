@@ -11,6 +11,8 @@
 |
 */
 
+use App\Post;
+
 $factory->define(App\User::class, function (Faker\Generator $faker) {
     static $password;
 
@@ -19,5 +21,11 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
         'email' => $faker->unique()->safeEmail,
         'password' => $password ?: $password = bcrypt('secret'),
         'remember_token' => str_random(10),
+    ];
+});
+$factory->define(Post::class, function (Faker\Generator $faker) {
+    return [
+        'title' => $faker->sentence,
+        'body' => $faker->paragraph,
     ];
 });
