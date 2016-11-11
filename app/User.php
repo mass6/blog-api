@@ -2,12 +2,13 @@
 
 namespace App;
 
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,4 +27,38 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /*
+     |--------------------------------------------------------------------------
+     | Operations
+     |--------------------------------------------------------------------------
+     |
+     */
+    /**
+     * Create a user post
+     *
+     * @param $data
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function createPost($data)
+    {
+        return $this->posts()->create($data);
+    }
+
+    /*
+     |--------------------------------------------------------------------------
+     | Relations
+     |--------------------------------------------------------------------------
+     |
+     */
+
+    /**
+     * Relation: A user has many posts
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'author_id');
+    }
 }
