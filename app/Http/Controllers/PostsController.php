@@ -84,7 +84,7 @@ class PostsController extends Controller
     public function update(Request $request, Post $post)
     {
         if ($post->author->id !== $request->user()->id) {
-            return response('Unauthorized', 401);
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
         $this->validate($request, Post::$validationRules);
 
@@ -122,7 +122,7 @@ class PostsController extends Controller
     public function destroy(Request $request, Post $post)
     {
         if ($post->author->id !== $request->user()->id) {
-            return response('Unauthorized', 401);
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $post->delete();
