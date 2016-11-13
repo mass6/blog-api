@@ -1,8 +1,8 @@
 <?php
 
-use App\Comment;
 use App\Post;
 use App\User;
+use App\Comment;
 use App\Notifications\CommentAdded;
 use Illuminate\Support\Facades\Notification;
 
@@ -12,6 +12,8 @@ class CommentTest extends PassportTestCase
     /** @test */
     public function a_user_can_comment_on_a_post()
     {
+        $this->withoutNotifications();
+
         // Given there is a post
         $post = factory(User::class)->create()->posts()->create(factory(Post::class)->make()->toArray());
 
