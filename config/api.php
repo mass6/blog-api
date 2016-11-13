@@ -11,15 +11,12 @@ return [
     |
     */
 
-    'rate-limit' => [
-        'posts' => 5, // daily
-    ],
-
     'posts' => [
         'pagination' => [
             'perPageDefault' => 20,
             'PageDefaultMax' => 50,
         ],
+        'daily-creation-quota' => 5,
     ],
 
 ];

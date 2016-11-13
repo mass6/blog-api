@@ -150,7 +150,7 @@ class PostTest extends PassportTestCase
     public function a_user_is_not_allowed_to_exceed_his_daily_post_quota()
     {
         // Given a user who has reached his daily post quota
-        $quota = config('api.rate-limit.posts', 5);
+        $quota = config('api.posts.daily-creation-quota', 5);
         factory(Post::class, $quota)->create(['author_id' => $this->user->id]);
         // When the user attempts to create an additional post
         $this->postJson('/api/posts', ['title' => 'foo', 'body' => 'bar'], $this->headers);
