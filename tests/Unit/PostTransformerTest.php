@@ -6,7 +6,7 @@ use App\Transformers\PostTransformer;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class PostsTransformerTest extends TestCase
+class PostTransformerTest extends TestCase
 {
     use DatabaseMigrations;
 

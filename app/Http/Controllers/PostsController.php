@@ -6,6 +6,7 @@ use App\Post;
 use App\Comment;
 use Illuminate\Http\Request;
 use App\Transformers\PostTransformer;
+use App\Transformers\PaginatedPostsTransformer;
 
 /**
  * Class PostsController
@@ -27,6 +28,20 @@ class PostsController extends Controller
     public function __construct(Post $post)
     {
         $this->post = $post;
+    }
+
+    /**
+     * Return a paginated list of posts
+     *
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        $posts = $this->getPaginatedPosts($request);
+
+        return response()->json((new PaginatedPostsTransformer($posts))->transform(), 200);
     }
 
     /**
@@ -111,5 +126,22 @@ class PostsController extends Controller
         }
 
         $post->delete();
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    protected function getPaginatedPosts(Request $request)
+    {
+        $maxAllowed = config('api.posts.pagination.perPageMax', 50);
+        $perPage    = $request->get('perPage', config('api.posts.pagination.perPageDefault', 20));
+        $perPage    = $perPage <= $maxAllowed ? $perPage : $maxAllowed;
+
+        $posts = Post::orderBy('created_at', 'desc')->paginate($perPage);
+
+
+        return $posts;
     }
 }

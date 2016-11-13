@@ -15,4 +15,11 @@ return [
         'posts' => 5, // daily
     ],
 
+    'posts' => [
+        'pagination' => [
+            'perPageDefault' => 20,
+            'PageDefaultMax' => 50,
+        ],
+    ],
+
 ];

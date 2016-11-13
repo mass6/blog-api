@@ -34,6 +34,23 @@ class PostTest extends PassportTestCase
     }
 
     /** @test */
+    public function a_visitor_can_read_all_posts()
+    {
+        // Given there are posts
+        $this->user->posts()->createMany(factory(Post::class, 51)->make()->toArray());
+
+        // When a visitor tries to retrieve all recent posts
+        $this->get('/api/posts');
+
+        // Then he should see a paginated list of posts
+        $this->assertResponseOk();
+        $payload = json_decode($this->response->getContent());
+        $this->assertCount(20, $payload->data);
+    }
+
+
+
+    /** @test */
     public function a_user_can_create_a_blog_post()
     {
         // When I post a new blog post to the api
