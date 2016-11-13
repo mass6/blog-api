@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Notifications\CommentAdded;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
@@ -22,7 +23,27 @@ class Post extends Model
 
     public function addComment($data)
     {
-        $this->comments()->create($data);
+        $comment = $this->comments()->create($data);
+
+        $this->notifyPostSubscribers($comment);
+    }
+
+    /**
+     * Send notifications of new comment to users subscribed to the post
+     *
+     * @param Comment $comment
+     */
+    protected function notifyPostSubscribers(Comment $comment)
+    {
+        // Notify Users
+        $this->comments
+            ->pluck('user')
+            ->merge([$this->author])
+            ->unique()
+            ->reject($comment->user)
+            ->each(function($user) use ($comment) {
+                $user->notify(new CommentAdded($comment));
+            });
     }
 
     /*

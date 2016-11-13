@@ -42,7 +42,7 @@ class PassportTestCase extends TestCase
     protected function getAccessToken(User $user)
     {
         $this->artisan('passport:install');
-        $PasswordGrantClient = DB::table('oauth_clients')->where('name', 'Laravel Password Grant Client')->get()->first();
+        $PasswordGrantClient = DB::table('oauth_clients')->where('name', 'Tattoodo Blog Assignment Password Grant Client')->get()->first();
 
         $this->post('/oauth/token', [
             'grant_type' => 'password',

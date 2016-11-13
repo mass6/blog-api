@@ -1,7 +1,10 @@
 <?php
 
+use App\Comment;
 use App\Post;
 use App\User;
+use App\Notifications\CommentAdded;
+use Illuminate\Support\Facades\Notification;
 
 class CommentTest extends PassportTestCase
 {
@@ -35,5 +38,29 @@ class CommentTest extends PassportTestCase
 
         // And the comment should not be saved
         $this->assertCount(0, $post->comments);
+    }
+
+    /** @test */
+    public function it_notifies_all_post_subscribers_when_a_new_comment_is_made()
+    {
+        Notification::fake();
+
+        // Given there is a post
+        $author = factory(User::class)->create();
+        $post = $author->posts()->create(factory(Post::class)->make()->toArray());
+
+        // And two users have add comments to the post
+        $commentor1 = factory(User::class)->create();
+        $commentor2 = factory(User::class)->create();
+        Comment::create(['post_id' => $post->id, 'user_id' => $commentor1->id, 'body' => 'comment 1']);
+        Comment::create(['post_id' => $post->id, 'user_id' => $commentor2->id, 'body' => 'comment 2']);
+
+        // When I add a new comment on the post
+        $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => 'foobar comment'], $this->headers);
+
+        // Then the post author and the two commentors should receive notifications
+        Notification::assertSentTo(
+            [$author, $commentor1, $commentor2], CommentAdded::class
+        );
     }
 }
