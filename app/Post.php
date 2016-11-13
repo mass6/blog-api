@@ -4,12 +4,12 @@ namespace App;
 
 use Carbon\Carbon;
 use App\Notifications\CommentAdded;
+use App\Jobs\DetermineAuthorPopularity;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    /** Number of user comments that determine popularity */
-    const POPULARITY_THRESHOLD = 6;
+    const USER_COMMENTS_TO_SET_AUTHOR_POPULAR = 6;
 
     public static $validationRules = [
         'title' => 'required|max:255',
@@ -38,27 +38,9 @@ class Post extends Model
             'user_id' => $userId
         ]);
 
+        dispatch((new DetermineAuthorPopularity($this))->delay(Carbon::now()->addMinutes(0)));
+
         $this->notifyPostSubscribers($comment);
-
-        $this->determineAuthorPopularity();
-    }
-
-    /**
-     * Determine is the post author is popular, determined
-     * by the number of users whom have commented.
-     */
-    protected function determineAuthorPopularity()
-    {
-        $post = self::find($this->id);
-
-        $numberOfUsersCommented = $post->comments
-            ->pluck('user')
-            ->unique()
-            ->count();
-
-        if ($numberOfUsersCommented >= self::POPULARITY_THRESHOLD && !$post->author->isPopular()) {
-            $post->author->makePopular();
-        }
     }
 
     /**
