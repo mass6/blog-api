@@ -30,6 +30,8 @@ class Post extends Model
      *
      * @param $body
      * @param $userId
+     *
+     * @return Model
      */
     public function addComment($body, $userId)
     {
@@ -41,6 +43,8 @@ class Post extends Model
         dispatch((new DetermineAuthorPopularity($this))->delay(Carbon::now()->addMinutes(0)));
 
         $this->notifyPostSubscribers($comment);
+
+        return $comment;
     }
 
     /**
