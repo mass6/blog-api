@@ -1,27 +1,99 @@
-# Laravel PHP Framework
+# Blog REST API Assignment
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+Build a blogging REST API
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
+## Acceptance Tests
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
+In the context of this assignment, the following acceptance tests were established.
 
-## Official Documentation
+* A visitor can retrieve a blog post
+* A visitor can retrieve a list of blog posts
+* A user can create a blog post
+* A new post must pass validation
+* A user can update his own blog post
+* Updates to posts must past validation
+* A user can delete his own blog post
+* A user cannot update another user’s post
+* A user cannot delete another user’s post
+* A user cannot create more than 5 blog posts in the same day
+* A user can comment on a blog post
+* Subscribers (Author and previous commentors) of a blog post receive email notifications when a new comment is made
+* A user becomes popular if a post has comments from 6 or more distinct users
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
+## Setup
+1. Clone repository
+```
+git clone https://github.com/mass6/blog-api.git
+```
+2. Install package dependancies via composer
+```
+composer install
+```
+3. Migrate the database
+```
+php artisan migrate
+```
+4. Install Passport Oauth2 Server
+```
+php artisan passport:install
+```
+5. Run database seeder.
+The seeder will create 10 dummy users for use during testing. User id's will be 1-10.
+```
+php artisan db:seed
+```
+6. Generate user API token for desired test user.
+```
+/reqeust-token/{userId}
+```
+Note down the 'access_token' key. This is the user token needed to make calls to the API.
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
+## API End Points
+Use the access token generated in step 6 above to make calls the below API end points.
 
-## Security Vulnerabilities
+**GET /api/posts**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+Parameter | Default 
+--------- | ------ |
+perPage | 20 
+page | 1
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+**GET /api/posts/{id}**
+
+Parameter | Desc 
+--------- | ------ |
+{id} | PostId
+
+
+**POST /api/posts**
+
+Parameter | Type | Desc | Rules 
+--------- | ------ | --- | ---- |
+title | string | Post Title | required: max 255 chars
+Body | text | Post Body | required
+
+
+**PATCH /api/posts/{id}**
+
+Parameter | Type | Desc | Rules 
+--------- | ------ | --- | ---- |
+{id} | integer | PostId | required
+title | string | Post Title | required: max 255 chars
+Body | text | Post Body | required
+
+
+**DELETE /api/posts/{id}**
+
+Parameter | Type | Desc | Rules 
+--------- | ------ | --- | ---- |
+{id} | integer | PostId | required
+
+
+**POST /api/posts/{id}/comments**
+
+Parameter | Type | Desc | Rules 
+--------- | ------ | --- | ---- |
+{id} | integer | PostId | required
+Body | text | Comment Body | required
