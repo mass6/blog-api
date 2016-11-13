@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Post;
 use App\Comment;
 use Illuminate\Http\Request;
+use App\Transformers\PostTransformer;
 
 /**
  * Class PostsController
@@ -52,16 +53,7 @@ class PostsController extends Controller
      */
     public function show(Post $post)
     {
-        //return $post->author;
-        $data = [
-            'id' => $post->id,
-            'title' => $post->title,
-            'body' => $post->body,
-            'created_at' => $post->created_at->toDateTimeString(),
-            'author' => $post->author->name
-        ];
-
-        return response()->json($data, 200);
+        return response()->json((new PostTransformer($post))->transform(), 200);
     }
 
     /**

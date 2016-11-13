@@ -11,6 +11,7 @@
 |
 */
 
+use App\Comment;
 use App\Post;
 
 $factory->define(App\User::class, function (Faker\Generator $faker) {
@@ -27,5 +28,10 @@ $factory->define(Post::class, function (Faker\Generator $faker) {
     return [
         'title' => $faker->sentence,
         'body' => $faker->paragraph,
+    ];
+});
+$factory->define(Comment::class, function (Faker\Generator $faker) {
+    return [
+        'body' => $faker->sentence,
     ];
 });

@@ -18,9 +18,19 @@ class PostTest extends PassportTestCase
 
         // Then he should she the post details
         $this->assertResponseOk();
-        $read = json_decode($this->response->getContent());
-        $this->assertEquals($post->id, $read->id);
-        $this->assertEquals($post->body, $read->body);
+        $payload = json_decode($this->response->getContent());
+
+        $this->assertObjectHasAttribute('data', $payload);
+        $data = $payload->data;
+
+        $this->assertEquals($post->id, $data->id);
+        $this->assertEquals($post->title, $data->title);
+        $this->assertEquals($post->body, $data->body);
+        $this->assertEquals($post->created_at, $data->created_at);
+        $this->assertEquals($post->author->name, $data->author);
+
+        $this->assertObjectHasAttribute('comments', $data);
+        $this->assertObjectHasAttribute('data', $data->comments);
     }
 
     /** @test */

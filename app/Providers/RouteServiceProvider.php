@@ -32,7 +32,7 @@ class RouteServiceProvider extends ServiceProvider
         /** Explicit Bindings */
         Route::bind('post', function ($value) {
             try {
-                return Post::with('author')->findOrFail($value);
+                return Post::findOrFail($value);
             }
             catch(ModelNotFoundException $e)
             {
