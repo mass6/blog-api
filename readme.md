@@ -21,28 +21,28 @@ In the context of this assignment, the following acceptance tests were establish
 * A user becomes popular if a post has comments from 6 or more distinct users
 
 ## Setup
-1. Clone repository
+Step 1. Clone repository
 ```
 git clone https://github.com/mass6/blog-api.git
 ```
-2. Install package dependancies via composer
+Step 2. Install package dependancies via composer
 ```
 composer install
 ```
-3. Migrate the database
+Step 3. Migrate the database
 ```
 php artisan migrate
 ```
-4. Install Passport Oauth2 Server
+Step 4. Install Passport Oauth2 Server
 ```
 php artisan passport:install
 ```
-5. Run database seeder.
+Step 5. Run database seeder.
 The seeder will create 10 dummy users for use during testing. User id's will be 1-10.
 ```
 php artisan db:seed
 ```
-6. Generate user API token for desired test user.
+Step 6. Generate user API token for desired test user.
 ```
 /reqeust-token/{userId}
 ```
