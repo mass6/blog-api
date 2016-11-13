@@ -39,10 +39,7 @@ class PostsController extends Controller
     {
         $this->validate($request, Post::$validationRules);
 
-        $request->user()->createPost([
-            'title' => $request->get('title'),
-            'body' => $request->get('body')
-        ]);
+        $request->user()->createPost($request->get('title'), $request->get('body'));
     }
 
     /**
@@ -100,10 +97,7 @@ class PostsController extends Controller
     {
         $this->validate($request, Comment::$validationRules);
 
-        $post->addComment([
-            'body' => $request->get('body'),
-            'user_id' => $request->user()->id
-        ]);
+        $post->addComment($request->get('body'), $request->user()->id);
     }
 
     /**

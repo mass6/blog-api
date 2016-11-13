@@ -34,15 +34,21 @@ class User extends Authenticatable
      |--------------------------------------------------------------------------
      |
      */
+
     /**
      * Create a user post
      *
-     * @param $data
+     * @param $title
+     * @param $body
+     *
      * @return \Illuminate\Database\Eloquent\Model
      */
-    public function createPost($data)
+    public function createPost($title, $body)
     {
-        return $this->posts()->create($data);
+        return $this->posts()->create([
+            'title' => $title,
+            'body' => $body
+        ]);
     }
 
     /*

@@ -25,11 +25,15 @@ class Post extends Model
     /**
      * Add a new comment to the post
      *
-     * @param $data
+     * @param $body
+     * @param $userId
      */
-    public function addComment($data)
+    public function addComment($body, $userId)
     {
-        $comment = $this->comments()->create($data);
+        $comment = $this->comments()->create([
+            'body' => $body,
+            'user_id' => $userId
+        ]);
 
         $this->notifyPostSubscribers($comment);
     }
