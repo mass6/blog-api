@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use App\Notifications\CommentAdded;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,6 +22,11 @@ class Post extends Model
      |
      */
 
+    /**
+     * Add a new comment to the post
+     *
+     * @param $data
+     */
     public function addComment($data)
     {
         $comment = $this->comments()->create($data);
@@ -35,14 +41,16 @@ class Post extends Model
      */
     protected function notifyPostSubscribers(Comment $comment)
     {
+        $delay = Carbon::now()->addMinutes(1);
+
         // Notify Users
         $this->comments
             ->pluck('user')
             ->merge([$this->author])
             ->unique()
             ->reject($comment->user)
-            ->each(function($user) use ($comment) {
-                $user->notify(new CommentAdded($comment));
+            ->each(function($user) use ($comment, $delay) {
+                $user->notify((new CommentAdded($comment))->delay($delay));
             });
     }
 
