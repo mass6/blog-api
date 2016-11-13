@@ -41,7 +41,7 @@ class PostTest extends PassportTestCase
         $this->postJson('/api/posts', $post->toArray(), $this->headers);
 
         // Then a new blog post should be created and stored in the database
-        $this->assertResponseOk();
+        $this->assertEquals(201, $this->response->getStatusCode());
         $saved = Post::first();
         $this->assertEquals($post->title, $saved->title);
         $this->assertEquals($post->body, $saved->body);

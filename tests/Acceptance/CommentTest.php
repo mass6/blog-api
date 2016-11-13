@@ -21,7 +21,7 @@ class CommentTest extends PassportTestCase
         $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => 'foobarbaz'], $this->headers);
 
         // Then the comment should be saved
-        $this->assertResponseOk();
+        $this->assertEquals(201, $this->response->getStatusCode());
         $this->assertCount(1, $post->comments);
         $this->assertEquals('foobarbaz', $post->comments->first()->body);
     }
