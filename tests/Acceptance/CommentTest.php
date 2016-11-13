@@ -65,4 +65,25 @@ class CommentTest extends PassportTestCase
             [$author, $commentor1, $commentor2], CommentAdded::class
         );
     }
+
+    /** @test */
+    public function it_marks_a_user_as_popular_if_a_post_is_commented_on_by_many_users()
+    {
+        $this->withoutNotifications();
+
+        $numberOfCommentsToBePopular = Post::POPULARITY_THRESHOLD;
+
+        // Given there is a post
+        $post = $this->user->posts()->create(factory(Post::class)->make()->toArray());
+
+        // When it has received comments from more than 5 other users
+        factory(User::class, $numberOfCommentsToBePopular)->create()
+            ->each(function($user) use ($post) {
+                $post->addComment('Comment from user ' . $user->id, $user->id);
+            });
+
+        // Then the author should be marked as a popular user
+        $this->user = User::find($this->user->id); // reload model from DB
+        $this->assertTrue($this->user->isPopular());
+    }
 }

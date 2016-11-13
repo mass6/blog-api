@@ -28,6 +28,26 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    /**
+     * Get the user's popularity
+     *
+     * @return bool
+     */
+    public function isPopular()
+    {
+        return (bool) $this->popular;
+    }
+
+    /**
+     * Set the user to popular
+     */
+    public function makePopular()
+    {
+        $this->popular = true;
+        $this->save();
+    }
+
+
     /*
      |--------------------------------------------------------------------------
      | Operations

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    /** Number of user comments that determine popularity */
+    const POPULARITY_THRESHOLD = 6;
+
     public static $validationRules = [
         'title' => 'required|max:255',
         'body' => 'required',
@@ -36,6 +39,26 @@ class Post extends Model
         ]);
 
         $this->notifyPostSubscribers($comment);
+
+        $this->determineAuthorPopularity();
+    }
+
+    /**
+     * Determine is the post author is popular, determined
+     * by the number of users whom have commented.
+     */
+    protected function determineAuthorPopularity()
+    {
+        $post = self::find($this->id);
+
+        $numberOfUsersCommented = $post->comments
+            ->pluck('user')
+            ->unique()
+            ->count();
+
+        if ($numberOfUsersCommented >= self::POPULARITY_THRESHOLD && !$post->author->isPopular()) {
+            $post->author->makePopular();
+        }
     }
 
     /**
