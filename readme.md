@@ -80,8 +80,8 @@ Body | text | Post Body | required
 Parameter | Type | Desc | Rules 
 --------- | ------ | --- | ---- |
 {id} | integer | PostId | required
-title | string | Post Title | required: max 255 chars
-Body | text | Post Body | required
+title | string | Post Title | min 1 char, max 255 chars
+Body | text | Post Body | min 1 char
 
 
 **DELETE /api/posts/{id}**

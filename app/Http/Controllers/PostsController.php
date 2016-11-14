@@ -86,12 +86,18 @@ class PostsController extends Controller
         if ($post->author->id !== $request->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        $this->validate($request, Post::$validationRules);
 
-        $post->update([
-            'title' => $request->get('title'),
-            'body' => $request->get('body')
+        $this->validate($request, [
+            'title' => 'min:1|max:255',
+            'body' => 'min:1',
         ]);
+
+        $data = collect($request->only('title', 'body'))
+            ->reject(function($key) {
+                return $key == null;
+            });
+
+        $post->update($data->toArray());
     }
 
     /**
