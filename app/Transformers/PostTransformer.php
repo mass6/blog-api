@@ -10,6 +10,8 @@ use App\Post;
 class PostTransformer implements PayloadTransformer
 {
 
+    const COMMENT_LIMIT = 3;
+
     /**
      * @var Post
      */
@@ -31,13 +33,7 @@ class PostTransformer implements PayloadTransformer
 
         $post->load('author', 'comments.user');
 
-        $comments = $post->comments->map(function($c) {
-            return [
-                'body' => $c->body,
-                'created_by' => $c->user->name,
-                'created_at' => $c->created_at->toDateTimeString(),
-            ];
-        });
+        $comments = (new CommentCollectionTransformer($post->comments()->get()))->transform();
 
         return [
             'data' => [
