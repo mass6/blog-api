@@ -19,9 +19,9 @@ class LogRequests
         $response = $next($request);
 
         $data = [
-            'user' => $request->user()->id,
+            'user' => $request->user() ? $request->user()->id : 'visitor',
             'path' => $request->path(),
-            'content' => $request->getContent(),
+            'parameters' => $request->getContent(),
         ];
 
         Log::info($data);
