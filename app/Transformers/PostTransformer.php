@@ -33,7 +33,7 @@ class PostTransformer implements PayloadTransformer
 
         $post->load('author', 'comments.user');
 
-        $comments = (new CommentCollectionTransformer($post->comments()->get()))->transform();
+        $comments = (new CommentCollectionTransformer($post->comments()->limit(self::COMMENT_LIMIT)->get()))->transform();
 
         return [
             'data' => [
