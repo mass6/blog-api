@@ -45,12 +45,14 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        if ($exception instanceof ModelNotFoundException) {
-            return response()->json($exception->getMessage(), 404);
-        }
+        if ($request->wantsJson()) {
+            if ($exception instanceof ModelNotFoundException) {
+                return response()->json($exception->getMessage(), 404);
+            }
 
-        if ($exception instanceof QuotaExceededException) {
-            return response()->json($exception->getMessage(), 403);
+            if ($exception instanceof QuotaExceededException) {
+                return response()->json($exception->getMessage(), 403);
+            }
         }
 
         return parent::render($request, $exception);

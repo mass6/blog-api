@@ -98,6 +98,8 @@ class PostsController extends Controller
             });
 
         $post->update($data->toArray());
+
+        return response('', 200);
     }
 
     /**
@@ -132,6 +134,8 @@ class PostsController extends Controller
         }
 
         $post->delete();
+
+        return response('', 200);
     }
 
     /**
@@ -146,7 +150,6 @@ class PostsController extends Controller
         $perPage    = $perPage <= $maxAllowed ? $perPage : $maxAllowed;
 
         $posts = Post::orderBy('created_at', 'desc')->paginate($perPage);
-
 
         return $posts;
     }
