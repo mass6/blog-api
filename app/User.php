@@ -65,10 +65,7 @@ class User extends Authenticatable
      */
     public function createPost($title, $body)
     {
-        return $this->posts()->create([
-            'title' => $title,
-            'body' => $body
-        ]);
+        return Post::createPost($title, $body, $this);
     }
 
     /*

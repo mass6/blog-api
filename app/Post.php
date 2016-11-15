@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Notifications\CommentAdded;
 use App\Jobs\DetermineAuthorPopularity;
 use Illuminate\Database\Eloquent\Model;
+use App\Exceptions\QuotaExceededException;
 
 class Post extends Model
 {
@@ -24,6 +25,29 @@ class Post extends Model
      |--------------------------------------------------------------------------
      |
      */
+
+    public static function createPost($title, $body, $user)
+    {
+        $quota = config('api.posts.daily-creation-quota', 5);
+        $postsToday = static::where('author_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit($quota)
+            ->get()
+            ->filter(function($post){
+                return $post->created_at->isToday();
+            });
+
+        if($postsToday->count() < $quota) {
+            return $user->posts()->create([
+                'title' => $title,
+                'body' => $body
+            ]);
+        }
+
+        throw new QuotaExceededException('Daily rate limit exceeded.');
+    }
+
+
 
     /**
      * Add a new comment to the post

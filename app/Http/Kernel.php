@@ -53,7 +53,6 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'post-quota' => \App\Http\Middleware\DailyPostQuota::class,
         'logging' => \App\Http\Middleware\LogRequests::class,
     ];
 }
