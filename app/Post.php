@@ -4,7 +4,6 @@ namespace App;
 
 use Carbon\Carbon;
 use App\Notifications\CommentAdded;
-use App\Jobs\DetermineAuthorPopularity;
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\QuotaExceededException;
 
@@ -64,11 +63,34 @@ class Post extends Model
             'user_id' => $userId
         ]);
 
-        dispatch((new DetermineAuthorPopularity($this))->delay(Carbon::now()->addMinutes(0)));
+        $this->determineAuthorPopularity();
 
         $this->notifyPostSubscribers($comment);
 
         return $comment;
+    }
+
+    /**
+     * A user is considered popular if a post is commented on
+     * by the amount of distinct users configured
+     * in USER_COMMENTS_TO_SET_AUTHOR_POPULAR
+     */
+    protected function determineAuthorPopularity()
+    {
+        // refresh post model
+        $post = Post::find($this->id);
+
+        // Get number of distinct users who have commented, excluding the author
+        $numberOfUsersCommented = $post->comments
+            ->pluck('user')
+            ->unique()
+            ->reject($post->author)
+            ->count();
+
+        // if number of users meets the threshold for user popularity, mark the user as popular
+        if ($numberOfUsersCommented >= Post::USER_COMMENTS_TO_SET_AUTHOR_POPULAR && ! $post->author->isPopular()) {
+            $post->author->makePopular();
+        }
     }
 
     /**
