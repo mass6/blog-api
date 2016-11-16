@@ -6,7 +6,7 @@ use App\Comment;
 use App\Notifications\CommentAdded;
 use Illuminate\Support\Facades\Notification;
 
-class CommentTest extends PassportTestCase
+class CommentTest extends TestCase
 {
 
     /** @test */
@@ -18,7 +18,7 @@ class CommentTest extends PassportTestCase
         $post = factory(User::class)->create()->posts()->create(factory(Post::class)->make()->toArray());
 
         // When I submit a post comment
-        $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => 'foobarbaz'], $this->headers);
+        $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => 'foobarbaz'], $this->getHeadersWithToken());
 
         // Then the comment should be saved
         $this->assertEquals(201, $this->response->getStatusCode());
@@ -33,7 +33,7 @@ class CommentTest extends PassportTestCase
         $post = factory(User::class)->create()->posts()->create(factory(Post::class)->make()->toArray());
 
         // When I attempt to create a comment with an empty text body
-        $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => ''], $this->headers);
+        $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => ''], $this->getHeadersWithToken());
 
         // Then the I should receive a 422 error response
         $this->assertEquals(422, $this->response->getStatusCode());
@@ -58,7 +58,7 @@ class CommentTest extends PassportTestCase
         Comment::create(['post_id' => $post->id, 'user_id' => $commentor2->id, 'body' => 'comment 2']);
 
         // When I add a new comment on the post
-        $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => 'foobar comment'], $this->headers);
+        $this->postJson('/api/posts/'.$post->id.'/comments', ['body' => 'foobar comment'], $this->getHeadersWithToken());
 
         // Then the post author and the two commentors should receive notifications
         Notification::assertSentTo(
@@ -86,4 +86,5 @@ class CommentTest extends PassportTestCase
         $this->user = User::find($this->user->id); // reload model from DB
         $this->assertTrue($this->user->isPopular());
     }
+
 }
