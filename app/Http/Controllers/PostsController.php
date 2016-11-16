@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Post;
 use App\Comment;
 use Illuminate\Http\Request;
-use App\Transformers\PostTransformer;
 use App\Transformers\PaginatedPostsTransformer;
+use App\Transformers\PostWithCommentsTransformer;
 
 /**
  * Class PostsController
@@ -70,7 +70,7 @@ class PostsController extends Controller
      */
     public function show(Post $post)
     {
-        return response()->json((new PostTransformer($post))->transform(), 200);
+        return response()->json((new PostWithCommentsTransformer($post))->transform(), 200);
     }
 
     /**

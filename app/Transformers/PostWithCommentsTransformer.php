@@ -7,7 +7,7 @@ use App\Post;
 /**
  * Transforms a Post into a formatted payload
  */
-class PostTransformer implements PayloadTransformer
+class PostWithCommentsTransformer implements PayloadTransformer
 {
 
     const COMMENT_LIMIT = 3;
@@ -33,12 +33,12 @@ class PostTransformer implements PayloadTransformer
 
         $post->load('author', 'comments.user');
 
+        $comments = (new CommentCollectionTransformer($post->comments()->limit(self::COMMENT_LIMIT)->get()))->transform();
+
+        $post = (new PostTransformer($post))->transform();
+
         return [
-            'id' => $post->id,
-            'title' => $post->title,
-            'body' => $post->body,
-            'created_at' => $post->created_at->toDateTimeString(),
-            'author' => $post->author->name,
+            'data' => array_merge($post, ['comments' => $comments]),
         ];
     }
 }

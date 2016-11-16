@@ -25,14 +25,16 @@ class PostCollectionTransformer implements PayloadTransformer
     public function transform()
     {
         return $this->posts->map(function($post) {
-            return [
-                'id' => $post->id,
-                'title' => $post->title,
-                'body' => $post->body,
-                'created_at' => $post->created_at->toDateTimeString(),
-                'author' => $post->author->name,
-                'comments_count' => $post->comments()->count(),
-            ];
+            $data = (new PostTransformer($post))->transform();
+
+            return $this->appendCommentsCount($data, $post);
+
         })->toArray();
     }
+
+    protected function appendCommentsCount($data, $post)
+    {
+        return array_merge($data, ['comments_count' => $post->comments()->count()]);
+    }
+
 }

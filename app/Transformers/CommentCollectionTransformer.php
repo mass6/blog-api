@@ -23,12 +23,18 @@ class CommentCollectionTransformer implements PayloadTransformer
      */
     public function transform()
     {
-        return $this->comments->map(function($c) {
+        $comments = $this->comments->map(function($c) {
             return [
                 'body' => $c->body,
                 'created_by' => $c->user->name,
                 'created_at' => $c->created_at->toDateTimeString(),
             ];
         });
+
+        if ($comments->count()) {
+            return ['data' => $comments];
+        }
+
+        return [];
     }
 }
