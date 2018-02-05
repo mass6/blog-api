@@ -34,7 +34,7 @@ Route::get('request-token/{id?}', function($id = null) {
     }
 
     $http = new GuzzleHttp\Client;
-    $response = $http->post('http://blog-api.app/oauth/token', [
+    $response = $http->post(env('APP_URL') . '/oauth/token', [
         'form_params' => [
             'grant_type' => 'password',
             'client_id' => $PasswordGrantClient->id,
