@@ -44,7 +44,7 @@ php artisan db:seed
 ```
 Step 6. Generate user API token for desired test user.
 ```
-/reqeust-token/{userId}
+/request-token/{userId}
 ```
 Note down the 'access_token' key. This is the user token needed to make calls to the API.
 
